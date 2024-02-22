@@ -286,13 +286,14 @@ if importMotion
     % construct default info for tracking systems
     tracking_systems                = trackSysInData;
     
+    % TODO should just automatically parse the contents from the json file
     for Ti = 1:numel(tracking_systems)
         defaultTrackingSystems(Ti).TrackingSystemName               = tracking_systems{Ti};
-        defaultTrackingSystems(Ti).Manufacturer                     = 'DefaultManufacturer';
-        defaultTrackingSystems(Ti).ManufacturersModelName           = 'DefaultModel';
-        defaultTrackingSystems(Ti).SamplingFrequency                = 'n/a'; %  If no nominal Fs exists, n/a entry returns 'n/a'. If it exists, n/a entry returns nominal Fs from motion stream.
+        defaultTrackingSystems(Ti).Manufacturer                     = motionInfo.Manufacturer;
+        defaultTrackingSystems(Ti).ManufacturersModelName           = motionInfo.ManufacturersModelName;
+        defaultTrackingSystems(Ti).SamplingFrequency                = motionInfo.SamplingFrequency; %  If no nominal Fs exists, n/a entry returns 'n/a'. If it exists, n/a entry returns nominal Fs from motion stream.
         defaultTrackingSystems(Ti).DeviceSerialNumber               = 'n/a';
-        defaultTrackingSystems(Ti).SoftwareVersions                 = 'n/a';
+        defaultTrackingSystems(Ti).SoftwareVersions                 = motionInfo.SoftwareVersions;
         defaultTrackingSystems(Ti).ExternalSoftwareVersions         = 'n/a';
         defaultTrackingSystems(Ti).RecordingType                    = 'continuous';
         defaultTrackingSystems(Ti).SpatialAxes                      = 'n/a';
@@ -421,6 +422,11 @@ end
 %--------------------------------------------------------------------------
 disp('Loading .xdf streams ...')
 streams                  = load_xdf(cfg.dataset,config.load_xdf_flags{:});
+if isfield(config, 'stream_indices') % handle cases where only some streams should be selected from the xdf
+    streams              = streams(config.stream_indices);
+end
+
+% manual fixes for subject 7 in CPS 1 study 'Prediction Error'
 
 % initialize an array of booleans indicating whether the streams are continuous
 ismarker = false(size(streams));
@@ -599,7 +605,7 @@ if ~isempty(xdfmarkers) > 0
         physio_times_2{i} = find(xdfphysio{i}.time_stamps > times_stamp_2-1 & xdfphysio{i}.time_stamps < times_stamp_2+2);
     end
     
-    raw_fig = figure('color','w','position',[1 1 1920 1080]);
+    raw_fig = figure('color','w','position',[1 1 1920 1080], 'Visible','off');
     sgtitle(['Raw data from ' cfg.dataset],'interpreter','none')
     
     subplot(211); hold on; grid on; grid(gca,'minor')
@@ -711,8 +717,8 @@ if ~isempty(xdfmarkers) > 0
     ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
     
     [filepath,name,~] = fileparts(cfg.dataset);
-    savefig(raw_fig,fullfile(filepath,[name '_raw-data']))
-    print(raw_fig,fullfile(filepath,[name '_raw-data']),'-dpng')
+    savefig(raw_fig,fullfile(filepath,strcat(name, '_raw-data')))
+    print(raw_fig,fullfile(filepath,strcat(name, '_raw-data')),'-dpng')
     close(raw_fig)
     
 else
@@ -751,10 +757,11 @@ if importEEG % This loop is always executed in current version
     end
     
     % try to use metadata provided by the user - if provided, will overwrite values from config.
-    if exist('eegInfo','var')
-        if isfield(eegInfo, 'eeg')
-            eegcfg.eeg          = eegInfo.eeg;
-        end
+    if exist('eegInfo','var')       
+        % if isfield(eegInfo, 'eeg')
+        %     eegcfg.eeg          = eegInfo.eeg;
+        % end
+        eegcfg.eeg = eegInfo;
         if isfield(eegInfo, 'coordsystem')
             eegcfg.coordsystem  = eegInfo.coordsystem;
         end
@@ -846,7 +853,21 @@ if importEEG % This loop is always executed in current version
     % acquisition time processing
     eegcfg.scans.acq_time = datenum(config.acquisition_time);
     eegcfg.scans.acq_time = datestr(eegcfg.scans.acq_time,'yyyy-mm-ddTHH:MM:SS.FFF'); % milisecond precision
-    
+
+    % labels, type and unit in right place for data2bids
+    if isfield(eeg, 'label')
+        eegcfg.channels.name = eeg.label';
+    else
+        eegcfg.channels.name = eeg.hdr.label';
+    end
+
+    % if specified, replace channel type of the read eeg stream
+    if isfield(config.eeg, 'channel_types')
+        eegcfg.channels.type = config.eeg.channel_types';
+    else
+        eegcfg.channels.type = eeg.hdr.chantype';
+    end
+    eegcfg.channels.units = eeg.hdr.chanunit';
     
     % write eeg files in bids format
     data2bids(eegcfg, eeg);
@@ -1100,7 +1121,7 @@ if importPhys
     
 end
 
-% add general json files
+%% add general json files
 %--------------------------------------------------------------------------
 ft_hastoolbox('jsonlab', 1);
 

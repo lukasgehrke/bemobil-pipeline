@@ -153,6 +153,8 @@ for iSub = 1:numel(subDirList)
             sesFilesBEH     = dir(sesBEHDir)';
             sesFilesMOTION  = dir(sesMOTIONDir)';
             allFiles        = [allFiles sesFilesEEG sesFilesBEH sesFilesMOTION];
+            nameArray       = {allFiles.name};
+            allFiles        = allFiles(~startsWith(nameArray, '.'));
         end
 
     else
@@ -166,7 +168,8 @@ for iSub = 1:numel(subDirList)
     end
 
     % select only .set files
-    allFiles = allFiles(contains({allFiles(:).name},'.set')) ;
+    allFiles = allFiles(contains({allFiles(:).name},'.set'));
+    % allFiles = allFiles(~contains({allFiles(:).name}, '._'));
 
     for iFile = 1:numel(allFiles)
 
@@ -301,6 +304,8 @@ for iSub = 1:numel(subDirList)
 
     % list all files in the subject folder
     subjectFiles = dir(fullfile(targetDir, subDirList(iSub).name));
+    subjectFiles = subjectFiles(~startsWith({subjectFiles.name}, '.'));
+
     subjectNr = str2double(subDirList(iSub).name(numel(config.filename_prefix) + 1:end));
 
     % initialize a list of all tracking systems detected in data set
@@ -311,7 +316,7 @@ for iSub = 1:numel(subDirList)
 
         clear importfigs
         % find all EEG data
-        eegFiles = {subjectFiles(contains({subjectFiles.name}, [config.session_names{iSes} '_EEG']) & contains({subjectFiles.name}, '_old.set')).name};
+        eegFiles = {subjectFiles(contains({subjectFiles.name}, strcat(config.session_names{iSes}, '_EEG')) & contains({subjectFiles.name}, '_old.set')).name};
         eegFiles = natsortfiles(eegFiles);
 
         % resample and merge EEG
@@ -355,9 +360,12 @@ for iSub = 1:numel(subDirList)
                 rmpath(genpath(fullfile(ftPath, [filesep 'external' filesep 'signal'])))
                 
                 % remove events with NaN latency before resampling
-                eventLatencies      = [EEG.event(:).latency];
-                nanInds             = find(isnan(eventLatencies));
-                EEG.event(nanInds)  = []; 
+
+                if ~isempty(EEG.event)
+                    eventLatencies      = [EEG.event(:).latency];
+                    nanInds             = find(isnan(eventLatencies));
+                    EEG.event(nanInds)  = []; 
+                end
                 
                 EEG                 = pop_resample( EEG, newSRate); % use filter-based resampling
                 %                 [EEG]       = resampleToTime(EEG, newSRate, EEG.times(1), EEG.times(end), 0); % resample
@@ -373,7 +381,7 @@ for iSub = 1:numel(subDirList)
 
                 % plot
                 if ~isempty(EEG.event)
-                    importfigs(Ri) = figure('color','w','position',[1 1 1920 1080]);
+                    importfigs(Ri) = figure('color','w','position',[1 1 1920 1080], 'visible', 'off');
 
                     sgtitle(['Imported data from ' fullfile(EEG.filepath,erase(EEG.filename,'_old'))],'interpreter','none')
 
@@ -464,7 +472,7 @@ for iSub = 1:numel(subDirList)
 
             % plot
             if ~isempty(EEG.event)
-                importfigs = figure('color','w','position',[1 1 1920 1080]);
+                importfigs = figure('color','w','position',[1 1 1920 1080], 'visible', 'off');
                 
                 sgtitle(['Imported data from ' fullfile(EEG.filepath,erase(EEG.filename,'_old'))],'interpreter','none')
                 
@@ -549,7 +557,7 @@ for iSub = 1:numel(subDirList)
             end
 
             % find all data of the type
-            modalityFiles = {subjectFiles(contains({subjectFiles.name}, [config.session_names{iSes} '_' bemobilModality]) & contains({subjectFiles.name}, '_old.set')).name};
+            modalityFiles = {subjectFiles(contains({subjectFiles.name}, strcat(config.session_names{iSes}, '_', bemobilModality)) & contains({subjectFiles.name}, '_old.set')).name};
 
             trackingSystemsInSession = {};
             if strcmp(bemobilModality, 'MOTION') && isMultiTrackSys
@@ -806,17 +814,17 @@ for iSub = 1:numel(subDirList)
         if exist('importfigs','var')
             if length(importfigs) == 1
                 savefig(importfigs,...
-                    fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_imported-data']))
+                    fullfile(targetDir, subDirList(iSub).name, strcat(subDirList(iSub).name, '_', config.session_names{iSes}, '_imported-data')))
                 print(importfigs,...
-                    fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_imported-data']),'-dpng')
+                    fullfile(targetDir, subDirList(iSub).name, strcat(subDirList(iSub).name, '_', config.session_names{iSes}, '_imported-data')),'-dpng')
                 close(importfigs)
             else
                 for i = 1:length(importfigs)
                     if ishandle(importfigs(i))
                         savefig(importfigs(i),...
-                            fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_run-' num2str(i) '_imported-data']))
+                            fullfile(targetDir, subDirList(iSub).name, strcat(subDirList(iSub).name, '_', config.session_names{iSes}, '_run-', num2str(i), '_imported-data')))
                         print(importfigs(i),...
-                            fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_run-' num2str(i) '_imported-data']),'-dpng')
+                            fullfile(targetDir, subDirList(iSub).name, strcat(subDirList(iSub).name, '_', config.session_names{iSes}, '_run-', num2str(i), '_imported-data')),'-dpng')
                         close(importfigs(i))
                     end
                 end
@@ -1037,8 +1045,11 @@ end
 
 function [outPath, outName] = sessionfilename(targetDir, modality, bemobil_config, sesnr, subnr)
 
-outName     = [bemobil_config.filename_prefix, num2str(subnr), '_', bemobil_config.session_names{sesnr} '_' modality '.set'];
-outPath     = fullfile(targetDir,[bemobil_config.filename_prefix, num2str(subnr)]);
+% outName     = [bemobil_config.filename_prefix, num2str(subnr), '_', bemobil_config.session_names{sesnr} '_' modality '.set'];
+% outPath     = fullfile(targetDir,[bemobil_config.filename_prefix, num2str(subnr)]);
+
+outName     = strcat(bemobil_config.filename_prefix, num2str(subnr), '_', bemobil_config.session_names{sesnr}, '_', modality, '.set');
+outPath     = fullfile(targetDir,strcat(bemobil_config.filename_prefix, num2str(subnr)));
 
 end
 

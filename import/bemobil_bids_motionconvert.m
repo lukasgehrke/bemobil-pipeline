@@ -48,8 +48,6 @@ for iM = 1:numel(motionIn)
     quaternionKeyword       = 'quat';
     quaternionNames         = {};
     eulerComponents         = {'x','y','z'};
-    
-    
     disp(['Coverting motion data from stream ' streamsConfig{iM}.xdfname ' to BIDS format'])
 
     
@@ -72,8 +70,8 @@ for iM = 1:numel(motionIn)
         
         if isfield(streamsConfig{iM}.quaternions, 'keep_quats')
             keepQuats               = streamsConfig{iM}.quaternions.keep_quats;
-        else
-            keepQuats               = 0; 
+        else 
+            keepQuats               = 0;
         end
     end
     
@@ -195,7 +193,7 @@ for iM = 1:numel(motionIn)
         if ~isempty(cartNames)
             try
                 for ci = 1:3
-                    cartIndices(ci) = find(contains(labelsPre, cartNames(ci,ni),'IgnoreCase', true));
+                    cartIndices(ci) = find(contains(labelsPre, cartNames(ni, ci),'IgnoreCase', true));
                 end
                 cartFound = true; 
             catch

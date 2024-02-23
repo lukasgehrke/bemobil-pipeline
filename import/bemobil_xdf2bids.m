@@ -426,8 +426,6 @@ if isfield(config, 'stream_indices') % handle cases where only some streams shou
     streams              = streams(config.stream_indices);
 end
 
-% manual fixes for subject 7 in CPS 1 study 'Prediction Error'
-
 % initialize an array of booleans indicating whether the streams are continuous
 ismarker = false(size(streams));
 emptystream = false(size(streams));

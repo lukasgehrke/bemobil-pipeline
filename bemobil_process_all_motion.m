@@ -71,6 +71,7 @@ if ~exist('EEG_motion_out','var')
     %%
     all_tracked_points = lower({EEG_motion_in.chanlocs.tracked_point}');
     all_rigidbody = unique(all_tracked_points);
+    all_rigidbody = all_rigidbody(~contains(all_rigidbody,'n/a'));
     
     EEG_motion_out = EEG_motion_in;
     EEG_motion_out.nbchan = 0;

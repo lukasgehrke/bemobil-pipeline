@@ -462,66 +462,66 @@ for iSub = 1:numel(subDirList)
             end
             eegEvents{end +1}   = EEG.event;
 
-            % plot
-            if ~isempty(EEG.event)
-                importfigs = figure('color','w','position',[1 1 1920 1080]);
+            % % plot
+            % if ~isempty(EEG.event)
+            %     importfigs = figure('color','w','position',[1 1 1920 1080]);
                 
-                sgtitle(['Imported data from ' fullfile(EEG.filepath,erase(EEG.filename,'_old'))],'interpreter','none')
+            %     sgtitle(['Imported data from ' fullfile(EEG.filepath,erase(EEG.filename,'_old'))],'interpreter','none')
                 
-                latencies_1 = EEG.event(1).latency;
-                latencies_2 = EEG.event(end).latency;
+            %     latencies_1 = EEG.event(1).latency;
+            %     latencies_2 = EEG.event(end).latency;
                 
-                latenciesToPlot_1 = latencies_1-EEG.srate:latencies_1+2*EEG.srate;
-                latenciesToPlot_1(latenciesToPlot_1<1) = [];
-                latenciesToPlot_1(latenciesToPlot_1>EEG.pnts) = [];
-                latenciesToPlot_2 = latencies_2-EEG.srate:latencies_2+2*EEG.srate;
-                latenciesToPlot_2(latenciesToPlot_2<1) = [];
-                latenciesToPlot_2(latenciesToPlot_2>EEG.pnts) = [];
+            %     latenciesToPlot_1 = latencies_1-EEG.srate:latencies_1+2*EEG.srate;
+            %     latenciesToPlot_1(latenciesToPlot_1<1) = [];
+            %     latenciesToPlot_1(latenciesToPlot_1>EEG.pnts) = [];
+            %     latenciesToPlot_2 = latencies_2-EEG.srate:latencies_2+2*EEG.srate;
+            %     latenciesToPlot_2(latenciesToPlot_2<1) = [];
+            %     latenciesToPlot_2(latenciesToPlot_2>EEG.pnts) = [];
                 
-                subplot(211); hold on; grid on; grid(gca,'minor')
-                title(['First event: "' EEG.event(1).type '"'],'interpreter','none')
-                yticks(-1)
-                yticklabels('')
-                xlabel('seconds')
-                xlim([EEG.times(latenciesToPlot_1(1)) EEG.times(latenciesToPlot_1(end))]/1000-EEG.times(latencies_1)/1000)
+            %     subplot(211); hold on; grid on; grid(gca,'minor')
+            %     title(['First event: "' EEG.event(1).type '"'],'interpreter','none')
+            %     yticks(-1)
+            %     yticklabels('')
+            %     xlabel('seconds')
+            %     xlim([EEG.times(latenciesToPlot_1(1)) EEG.times(latenciesToPlot_1(end))]/1000-EEG.times(latencies_1)/1000)
                 
-                plot([0 0],[-1 100],'k')
+            %     plot([0 0],[-1 100],'k')
                 
-                my_yticks = yticks;
-                plot(EEG.times(latenciesToPlot_1)/1000-EEG.times(latencies_1)/1000,...
-                    normalize(EEG.data(1,latenciesToPlot_1),...
-                    'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
-                yticks([yticks my_yticks(end)+1.5])
-                yticklabels([yticklabels
-                    strrep(['EEG ' EEG.chanlocs(1).labels],'_', ' ')]);
-                ylim([-0.5 my_yticks(end)+2.5])
+            %     my_yticks = yticks;
+            %     plot(EEG.times(latenciesToPlot_1)/1000-EEG.times(latencies_1)/1000,...
+            %         normalize(EEG.data(1,latenciesToPlot_1),...
+            %         'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
+            %     yticks([yticks my_yticks(end)+1.5])
+            %     yticklabels([yticklabels
+            %         strrep(['EEG ' EEG.chanlocs(1).labels],'_', ' ')]);
+            %     ylim([-0.5 my_yticks(end)+2.5])
                 
-                ax = gca;
-                ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
+            %     ax = gca;
+            %     ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
                 
-                subplot(212); hold on; grid on; grid(gca,'minor')
-                title(['Last event: "' EEG.event(end).type '"'],'interpreter','none')
-                yticks(-1)
-                yticklabels('')
-                xlabel('seconds')
-                xlim([EEG.times(latenciesToPlot_2(1)) EEG.times(latenciesToPlot_2(end))]/1000-EEG.times(latencies_2)/1000)
+            %     subplot(212); hold on; grid on; grid(gca,'minor')
+            %     title(['Last event: "' EEG.event(end).type '"'],'interpreter','none')
+            %     yticks(-1)
+            %     yticklabels('')
+            %     xlabel('seconds')
+            %     xlim([EEG.times(latenciesToPlot_2(1)) EEG.times(latenciesToPlot_2(end))]/1000-EEG.times(latencies_2)/1000)
                 
-                plot([EEG.times(latencies_2) EEG.times(latencies_2)]/1000-EEG.times(latencies_2)/1000,[-1 100],'k')
+            %     plot([EEG.times(latencies_2) EEG.times(latencies_2)]/1000-EEG.times(latencies_2)/1000,[-1 100],'k')
                 
-                my_yticks = yticks;
-                plot(EEG.times(latenciesToPlot_2)/1000-EEG.times(latencies_2)/1000,...
-                    normalize(EEG.data(1,latenciesToPlot_2),...
-                    'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
-                yticks([yticks my_yticks(end)+1.5])
-                yticklabels([yticklabels
-                    strrep(['EEG ' EEG.chanlocs(1).labels],'_', ' ')]);
-                ylim([-0.5 my_yticks(end)+2.5])
+            %     my_yticks = yticks;
+            %     plot(EEG.times(latenciesToPlot_2)/1000-EEG.times(latencies_2)/1000,...
+            %         normalize(EEG.data(1,latenciesToPlot_2),...
+            %         'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
+            %     yticks([yticks my_yticks(end)+1.5])
+            %     yticklabels([yticklabels
+            %         strrep(['EEG ' EEG.chanlocs(1).labels],'_', ' ')]);
+            %     ylim([-0.5 my_yticks(end)+2.5])
                 
-                ax = gca;
-                ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
-            else
-                warning('NO MARKERS IN THE FILE! NO PLOT CAN BE CREATED')
-            end
+            %     ax = gca;
+            %     ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
+            % else
+            %     warning('NO MARKERS IN THE FILE! NO PLOT CAN BE CREATED')
+            % end
 
         else
             error(['No EEG file found in subject dir ' subDirList(iSub).name ', session ' config.session_names{iSes}] )
@@ -639,53 +639,53 @@ for iSub = 1:numel(subDirList)
                         DATA.event   = eegEvents{Ri};
                         [ALLDATA,DATA,CURRENTSET]  = pop_newset(ALLDATA, DATA, CURRENTSET, 'study',0);
                         
-                        % plot
-                        if ~isempty(DATA.event)
-                            figure(importfigs(Ri))
+                        % % plot
+                        % if ~isempty(DATA.event)
+                        %     figure(importfigs(Ri))
                             
-                            latencies_1 = DATA.event(1).latency;
-                            latencies_2 = DATA.event(end).latency;
+                        %     latencies_1 = DATA.event(1).latency;
+                        %     latencies_2 = DATA.event(end).latency;
                             
-                            latenciesToPlot_1 = latencies_1-DATA.srate:latencies_1+2*DATA.srate;
-                            latenciesToPlot_1(latenciesToPlot_1<1) = [];
-                            latenciesToPlot_1(latenciesToPlot_1>DATA.pnts) = [];
-                            latenciesToPlot_2 = latencies_2-DATA.srate:latencies_2+2*DATA.srate;
-                            latenciesToPlot_2(latenciesToPlot_2<1) = [];
-                            latenciesToPlot_2(latenciesToPlot_2>DATA.pnts) = [];
+                        %     latenciesToPlot_1 = latencies_1-DATA.srate:latencies_1+2*DATA.srate;
+                        %     latenciesToPlot_1(latenciesToPlot_1<1) = [];
+                        %     latenciesToPlot_1(latenciesToPlot_1>DATA.pnts) = [];
+                        %     latenciesToPlot_2 = latencies_2-DATA.srate:latencies_2+2*DATA.srate;
+                        %     latenciesToPlot_2(latenciesToPlot_2<1) = [];
+                        %     latenciesToPlot_2(latenciesToPlot_2>DATA.pnts) = [];
                             
-                            idx = find(~contains({DATA.chanlocs.labels},'eul') & ~contains({DATA.chanlocs.labels},'quat') &...
-                                ~contains({DATA.chanlocs.labels},'ori'),1,'first');
+                        %     idx = find(~contains({DATA.chanlocs.labels},'eul') & ~contains({DATA.chanlocs.labels},'quat') &...
+                        %         ~contains({DATA.chanlocs.labels},'ori'),1,'first');
                             
-                            subplot(211);
+                        %     subplot(211);
                             
-                            my_yticks = yticks;
-                            plot(DATA.times(latenciesToPlot_1)/1000-DATA.times(latencies_1)/1000,...
-                                normalize(DATA.data(idx,latenciesToPlot_1),...
-                                'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
-                            yticks([yticks my_yticks(end)+1.5])
-                            yticklabels([yticklabels
-                                strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
-                            ylim([-0.5 my_yticks(end)+2.5])
+                        %     my_yticks = yticks;
+                        %     plot(DATA.times(latenciesToPlot_1)/1000-DATA.times(latencies_1)/1000,...
+                        %         normalize(DATA.data(idx,latenciesToPlot_1),...
+                        %         'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
+                        %     yticks([yticks my_yticks(end)+1.5])
+                        %     yticklabels([yticklabels
+                        %         strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
+                        %     ylim([-0.5 my_yticks(end)+2.5])
                             
-                            ax = gca;
-                            ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
+                        %     ax = gca;
+                        %     ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
                             
-                            subplot(212);
+                        %     subplot(212);
                             
-                            my_yticks = yticks;
-                            plot(DATA.times(latenciesToPlot_2)/1000-DATA.times(latencies_2)/1000,...
-                                normalize(DATA.data(idx,latenciesToPlot_2),...
-                                'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
-                            yticks([yticks my_yticks(end)+1.5])
-                            yticklabels([yticklabels
-                                strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
-                            ylim([-0.5 my_yticks(end)+2.5])
+                        %     my_yticks = yticks;
+                        %     plot(DATA.times(latenciesToPlot_2)/1000-DATA.times(latencies_2)/1000,...
+                        %         normalize(DATA.data(idx,latenciesToPlot_2),...
+                        %         'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
+                        %     yticks([yticks my_yticks(end)+1.5])
+                        %     yticklabels([yticklabels
+                        %         strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
+                        %     ylim([-0.5 my_yticks(end)+2.5])
                             
-                            ax = gca;
-                            ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
-                        else
-                            warning('NO MARKERS IN THE FILE! NO PLOT CAN BE CREATED')
-                        end
+                        %     ax = gca;
+                        %     ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
+                        % else
+                        %     warning('NO MARKERS IN THE FILE! NO PLOT CAN BE CREATED')
+                        % end
                             
 
                     end
@@ -740,53 +740,53 @@ for iSub = 1:numel(subDirList)
                     DATA             = wrapAngles(DATA);
                     DATA.event       = eegEvents{1};
                     
-                    % plot
-                    if ~isempty(DATA.event)
-                        figure(importfigs)
+                    % % plot
+                    % if ~isempty(DATA.event)
+                    %     figure(importfigs)
                         
-                        latencies_1 = DATA.event(1).latency;
-                        latencies_2 = DATA.event(end).latency;
+                    %     latencies_1 = DATA.event(1).latency;
+                    %     latencies_2 = DATA.event(end).latency;
                         
-                        latenciesToPlot_1 = latencies_1-DATA.srate:latencies_1+2*DATA.srate;
-                        latenciesToPlot_1(latenciesToPlot_1<1) = [];
-                        latenciesToPlot_1(latenciesToPlot_1>DATA.pnts) = [];
-                        latenciesToPlot_2 = latencies_2-DATA.srate:latencies_2+2*DATA.srate;
-                        latenciesToPlot_2(latenciesToPlot_2<1) = [];
-                        latenciesToPlot_2(latenciesToPlot_2>DATA.pnts) = [];
+                    %     latenciesToPlot_1 = latencies_1-DATA.srate:latencies_1+2*DATA.srate;
+                    %     latenciesToPlot_1(latenciesToPlot_1<1) = [];
+                    %     latenciesToPlot_1(latenciesToPlot_1>DATA.pnts) = [];
+                    %     latenciesToPlot_2 = latencies_2-DATA.srate:latencies_2+2*DATA.srate;
+                    %     latenciesToPlot_2(latenciesToPlot_2<1) = [];
+                    %     latenciesToPlot_2(latenciesToPlot_2>DATA.pnts) = [];
                         
-                        idx = find(~contains({DATA.chanlocs.labels},'eul') & ~contains({DATA.chanlocs.labels},'quat') &...
-                            ~contains({DATA.chanlocs.labels},'ori'),1,'first');
+                    %     idx = find(~contains({DATA.chanlocs.labels},'eul') & ~contains({DATA.chanlocs.labels},'quat') &...
+                    %         ~contains({DATA.chanlocs.labels},'ori'),1,'first');
                         
-                        subplot(211);
+                    %     subplot(211);
                         
-                        my_yticks = yticks;
-                        plot(DATA.times(latenciesToPlot_1)/1000-DATA.times(latencies_1)/1000,...
-                            normalize(DATA.data(idx,latenciesToPlot_1),...
-                            'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
-                        yticks([yticks my_yticks(end)+1.5])
-                        yticklabels([yticklabels
-                            strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
-                        ylim([-0.5 my_yticks(end)+2.5])
+                    %     my_yticks = yticks;
+                    %     plot(DATA.times(latenciesToPlot_1)/1000-DATA.times(latencies_1)/1000,...
+                    %         normalize(DATA.data(idx,latenciesToPlot_1),...
+                    %         'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
+                    %     yticks([yticks my_yticks(end)+1.5])
+                    %     yticklabels([yticklabels
+                    %         strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
+                    %     ylim([-0.5 my_yticks(end)+2.5])
                         
-                        ax = gca;
-                        ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
+                    %     ax = gca;
+                    %     ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
                         
-                        subplot(212);
+                    %     subplot(212);
                         
-                        my_yticks = yticks;
-                        plot(DATA.times(latenciesToPlot_2)/1000-DATA.times(latencies_2)/1000,...
-                            normalize(DATA.data(idx,latenciesToPlot_2),...
-                            'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
-                        yticks([yticks my_yticks(end)+1.5])
-                        yticklabels([yticklabels
-                            strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
-                        ylim([-0.5 my_yticks(end)+2.5])
+                    %     my_yticks = yticks;
+                    %     plot(DATA.times(latenciesToPlot_2)/1000-DATA.times(latencies_2)/1000,...
+                    %         normalize(DATA.data(idx,latenciesToPlot_2),...
+                    %         'range',[my_yticks(end)+1 my_yticks(end)+2]), 'color', [78 165 216]/255)
+                    %     yticks([yticks my_yticks(end)+1.5])
+                    %     yticklabels([yticklabels
+                    %         strrep(['DATA ' DATA.chanlocs(idx).labels],'_', ' ')]);
+                    %     ylim([-0.5 my_yticks(end)+2.5])
                         
-                        ax = gca;
-                        ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
-                    else
-                        warning('NO MARKERS IN THE FILE! NO PLOT CAN BE CREATED')
-                    end
+                    %     ax = gca;
+                    %     ax.YAxis.MinorTickValues = ax.YAxis.Limits(1):0.2:ax.YAxis.Limits(2);
+                    % else
+                    %     warning('NO MARKERS IN THE FILE! NO PLOT CAN BE CREATED')
+                    % end
 
                 else
                     warning(['No file of modality ' bemobilModality ' found in subject dir ' subDirList(iSub).name ', session ' config.session_names{iSes}] )
@@ -802,26 +802,26 @@ for iSub = 1:numel(subDirList)
             end
         end
 
-        % save fig
-        if exist('importfigs','var')
-            if length(importfigs) == 1
-                savefig(importfigs,...
-                    fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_imported-data']))
-                print(importfigs,...
-                    fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_imported-data']),'-dpng')
-                close(importfigs)
-            else
-                for i = 1:length(importfigs)
-                    if ishandle(importfigs(i))
-                        savefig(importfigs(i),...
-                            fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_run-' num2str(i) '_imported-data']))
-                        print(importfigs(i),...
-                            fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_run-' num2str(i) '_imported-data']),'-dpng')
-                        close(importfigs(i))
-                    end
-                end
-            end
-        end
+        % % save fig
+        % if exist('importfigs','var')
+        %     if length(importfigs) == 1
+        %         savefig(importfigs,...
+        %             fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_imported-data']))
+        %         print(importfigs,...
+        %             fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_imported-data']),'-dpng')
+        %         close(importfigs)
+        %     else
+        %         for i = 1:length(importfigs)
+        %             if ishandle(importfigs(i))
+        %                 savefig(importfigs(i),...
+        %                     fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_run-' num2str(i) '_imported-data']))
+        %                 print(importfigs(i),...
+        %                     fullfile(targetDir, subDirList(iSub).name, [subDirList(iSub).name '_' config.session_names{iSes} '_run-' num2str(i) '_imported-data']),'-dpng')
+        %                 close(importfigs(i))
+        %             end
+        %         end
+        %     end
+        % end
 
     end
 

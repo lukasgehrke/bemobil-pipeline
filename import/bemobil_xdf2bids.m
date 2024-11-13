@@ -421,6 +421,9 @@ end
 %--------------------------------------------------------------------------
 disp('Loading .xdf streams ...')
 streams                  = load_xdf(cfg.dataset,config.load_xdf_flags{:});
+if isfield(config, 'stream_indices') % handle cases where only some streams should be selected from the xdf
+    streams              = streams(config.stream_indices);
+end
 
 % initialize an array of booleans indicating whether the streams are continuous
 ismarker = false(size(streams));

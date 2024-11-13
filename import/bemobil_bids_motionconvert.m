@@ -75,6 +75,10 @@ for iM = 1:numel(motionIn)
         else
             keepQuats               = 0; 
         end
+    else
+        keepQuats                   = 0;
+    end
+    
     end
     
     % Finding position data

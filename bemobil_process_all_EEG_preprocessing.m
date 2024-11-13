@@ -30,7 +30,7 @@
 % Authors: Marius Klug, 2021
 
 function [ALLEEG, EEG_preprocessed, CURRENTSET] = bemobil_process_all_EEG_preprocessing(subject, bemobil_config, ALLEEG, EEG_to_process,...
-    CURRENTSET, force_recompute)
+    CURRENTSET, force_recompute, exceeding_channels)
 
 % check config
 bemobil_config = bemobil_check_config(bemobil_config);
@@ -88,125 +88,125 @@ end
 
 if ~exist('EEG_basic','var')
     
-    %% plot raw data at 6 different times throughout the dataset
-    % 0.5hz filter just for plotting, so remove DC offset
-    
-    disp('Filtering data only for plotting!')
-    EEG = pop_eegfiltnew(EEG_to_process, 'locutoff',0.5);
-    
-    %% create plots
-    
-    plotfigure = figure('color','w');
-    set(plotfigure, 'Position', get(0,'screensize'))
-    ax1 = subplot(231);
-    ax2 = subplot(232);
-    ax3 = subplot(233);
-    ax4 = subplot(234);
-    ax5 = subplot(235);
-    ax6 = subplot(236);
-    
-    starttime = EEG.times(end)/7*1;
-    vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-        round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-    drawnow
-    axeshandle = gca;
-    fighandle = gcf;
-    axcp = copyobj(axeshandle, plotfigure);
-    set(axcp,'Position',get(ax1,'position'));
-    axcp.XTickLabel = [0:10]+round(starttime/1000);
-    axcp.YTick=[];
-    axcp.Title.String = ['Raw data section 1 of ' num2str(round(EEG.times(end)/1000)) 's'];
-    axcp.XLabel.String = 'seconds';
-    drawnow
-    delete(ax1);
-    close(fighandle)
-    
-    starttime = EEG.times(end)/7*2;
-    vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-        round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-    drawnow
-    axeshandle = gca;
-    fighandle = gcf;
-    axcp = copyobj(axeshandle, plotfigure);
-    set(axcp,'Position',get(ax2,'position'));
-    axcp.XTickLabel = [0:10]+round(starttime/1000);
-    axcp.YTick=[];
-    axcp.Title.String = ['Raw data section 2 of ' num2str(round(EEG.times(end)/1000)) 's'];
-    axcp.XLabel.String = 'seconds';
-    drawnow
-    delete(ax2);
-    close(fighandle)
-    
-    starttime = EEG.times(end)/7*3;
-    vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-        round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-    drawnow
-    axeshandle = gca;
-    fighandle = gcf;
-    axcp = copyobj(axeshandle, plotfigure);
-    set(axcp,'Position',get(ax3,'position'));
-    axcp.XTickLabel = [0:10]+round(starttime/1000);
-    axcp.YTick=[];
-    axcp.Title.String = ['Raw data section 3 of ' num2str(round(EEG.times(end)/1000)) 's'];
-    axcp.XLabel.String = 'seconds';
-    drawnow
-    delete(ax3);
-    close(fighandle)
-    
-    starttime = EEG.times(end)/7*4;
-    vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-        round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-    drawnow
-    axeshandle = gca;
-    fighandle = gcf;
-    axcp = copyobj(axeshandle, plotfigure);
-    set(axcp,'Position',get(ax4,'position'));
-    axcp.XTickLabel = [0:10]+round(starttime/1000);
-    axcp.YTick=[];
-    axcp.Title.String = ['Raw data section 4 of ' num2str(round(EEG.times(end)/1000)) 's'];
-    axcp.XLabel.String = 'seconds';
-    drawnow
-    delete(ax4);
-    close(fighandle)
-    
-    starttime = EEG.times(end)/7*5;
-    vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-        round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-    drawnow
-    axeshandle = gca;
-    fighandle = gcf;
-    axcp = copyobj(axeshandle, plotfigure);
-    set(axcp,'Position',get(ax5,'position'));
-    axcp.XTickLabel = [0:10]+round(starttime/1000);
-    axcp.YTick=[];
-    axcp.Title.String = ['Raw data section 5 of ' num2str(round(EEG.times(end)/1000)) 's'];
-    axcp.XLabel.String = 'seconds';
-    drawnow
-    delete(ax5);
-    close(fighandle)
-    
-    starttime = EEG.times(end)/7*6;
-    vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-        round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-    drawnow
-    axeshandle = gca;
-    fighandle = gcf;
-    axcp = copyobj(axeshandle, plotfigure);
-    set(axcp,'Position',get(ax6,'position'));
-    axcp.XTickLabel = [0:10]+round(starttime/1000);
-    axcp.YTick=[];
-    axcp.Title.String = ['Raw data section 6 of ' num2str(round(EEG.times(end)/1000)) 's'];
-    axcp.XLabel.String = 'seconds';
-    drawnow
-    delete(ax6);
-    close(fighandle)
-    
-    
-    %% save plot
-    
-    savefig(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_raw.fig']))
-    print(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_raw.png']),'-dpng')
-    close
+    % %% plot raw data at 6 different times throughout the dataset
+    % % 0.5hz filter just for plotting, so remove DC offset
+    % 
+    % disp('Filtering data only for plotting!')
+    % EEG = pop_eegfiltnew(EEG_to_process, 'locutoff',0.5);
+    % 
+    % %% create plots
+    % 
+    % plotfigure = figure('color','w');
+    % set(plotfigure, 'Position', get(0,'screensize'))
+    % ax1 = subplot(231);
+    % ax2 = subplot(232);
+    % ax3 = subplot(233);
+    % ax4 = subplot(234);
+    % ax5 = subplot(235);
+    % ax6 = subplot(236);
+    % 
+    % starttime = EEG.times(end)/7*1;
+    % vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+    %     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+    % drawnow
+    % axeshandle = gca;
+    % fighandle = gcf;
+    % axcp = copyobj(axeshandle, plotfigure);
+    % set(axcp,'Position',get(ax1,'position'));
+    % axcp.XTickLabel = [0:10]+round(starttime/1000);
+    % axcp.YTick=[];
+    % axcp.Title.String = ['Raw data section 1 of ' num2str(round(EEG.times(end)/1000)) 's'];
+    % axcp.XLabel.String = 'seconds';
+    % drawnow
+    % delete(ax1);
+    % close(fighandle)
+    % 
+    % starttime = EEG.times(end)/7*2;
+    % vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+    %     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+    % drawnow
+    % axeshandle = gca;
+    % fighandle = gcf;
+    % axcp = copyobj(axeshandle, plotfigure);
+    % set(axcp,'Position',get(ax2,'position'));
+    % axcp.XTickLabel = [0:10]+round(starttime/1000);
+    % axcp.YTick=[];
+    % axcp.Title.String = ['Raw data section 2 of ' num2str(round(EEG.times(end)/1000)) 's'];
+    % axcp.XLabel.String = 'seconds';
+    % drawnow
+    % delete(ax2);
+    % close(fighandle)
+    % 
+    % starttime = EEG.times(end)/7*3;
+    % vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+    %     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+    % drawnow
+    % axeshandle = gca;
+    % fighandle = gcf;
+    % axcp = copyobj(axeshandle, plotfigure);
+    % set(axcp,'Position',get(ax3,'position'));
+    % axcp.XTickLabel = [0:10]+round(starttime/1000);
+    % axcp.YTick=[];
+    % axcp.Title.String = ['Raw data section 3 of ' num2str(round(EEG.times(end)/1000)) 's'];
+    % axcp.XLabel.String = 'seconds';
+    % drawnow
+    % delete(ax3);
+    % close(fighandle)
+    % 
+    % starttime = EEG.times(end)/7*4;
+    % vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+    %     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+    % drawnow
+    % axeshandle = gca;
+    % fighandle = gcf;
+    % axcp = copyobj(axeshandle, plotfigure);
+    % set(axcp,'Position',get(ax4,'position'));
+    % axcp.XTickLabel = [0:10]+round(starttime/1000);
+    % axcp.YTick=[];
+    % axcp.Title.String = ['Raw data section 4 of ' num2str(round(EEG.times(end)/1000)) 's'];
+    % axcp.XLabel.String = 'seconds';
+    % drawnow
+    % delete(ax4);
+    % close(fighandle)
+    % 
+    % starttime = EEG.times(end)/7*5;
+    % vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+    %     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+    % drawnow
+    % axeshandle = gca;
+    % fighandle = gcf;
+    % axcp = copyobj(axeshandle, plotfigure);
+    % set(axcp,'Position',get(ax5,'position'));
+    % axcp.XTickLabel = [0:10]+round(starttime/1000);
+    % axcp.YTick=[];
+    % axcp.Title.String = ['Raw data section 5 of ' num2str(round(EEG.times(end)/1000)) 's'];
+    % axcp.XLabel.String = 'seconds';
+    % drawnow
+    % delete(ax5);
+    % close(fighandle)
+    % 
+    % starttime = EEG.times(end)/7*6;
+    % vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+    %     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+    % drawnow
+    % axeshandle = gca;
+    % fighandle = gcf;
+    % axcp = copyobj(axeshandle, plotfigure);
+    % set(axcp,'Position',get(ax6,'position'));
+    % axcp.XTickLabel = [0:10]+round(starttime/1000);
+    % axcp.YTick=[];
+    % axcp.Title.String = ['Raw data section 6 of ' num2str(round(EEG.times(end)/1000)) 's'];
+    % axcp.XLabel.String = 'seconds';
+    % drawnow
+    % delete(ax6);
+    % close(fighandle)
+    % 
+    % 
+    % %% save plot
+    % 
+    % savefig(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_raw.fig']))
+    % print(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_raw.png']),'-dpng')
+    % close
     
     if ~isempty(bemobil_config.channel_locations_filename)
         channel_locations_filepath = fullfile(bemobil_config.study_folder, bemobil_config.source_data_folder,...
@@ -230,9 +230,16 @@ end
 clear EEG_to_process
 
 %% detect bad channels
-[chans_to_interp, chan_detected_fraction_threshold, detected_bad_channels, rejected_chan_plot_handle, detection_plot_handle] = bemobil_detect_bad_channels(EEG_basic, ALLEEG, CURRENTSET,...
+
+extras_EEG_removed_chans = EEG_basic;
+channels_to_remove = {extras_EEG_removed_chans.chanlocs(exceeding_channels).labels};
+extras_EEG_removed_chans =  pop_select(extras_EEG_removed_chans, 'nochannel', channels_to_remove);
+
+[chans_to_interp, chan_detected_fraction_threshold, detected_bad_channels] = bemobil_detect_bad_channels(extras_EEG_removed_chans, ALLEEG, CURRENTSET,...
     bemobil_config.chancorr_crit,bemobil_config.chan_max_broken_time, bemobil_config.chan_detect_num_iter,...
     bemobil_config.chan_detected_fraction_threshold,bemobil_config.num_chan_rej_max_target, bemobil_config.flatline_crit,bemobil_config.line_noise_crit);
+
+chans_to_interp = union(chans_to_interp, exceeding_channels);
 
 if length(chans_to_interp) > EEG_basic.nbchan/5
     warndlg(['In subject ' num2str(subject) ', ' num2str(length(chans_to_interp)) ' of ' num2str(EEG_basic.nbchan)...
@@ -244,137 +251,138 @@ EEG_basic.etc.channel_rejection.bad_channel_detection = detected_bad_channels;
 
 %% save fig of bad channels
 
-savefig(rejected_chan_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels.fig']))
-print(rejected_chan_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels.png']),'-dpng')
-close(rejected_chan_plot_handle)
-
-savefig(detection_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels_detection.fig']))
-print(detection_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels_detection.png']),'-dpng')
-close(detection_plot_handle)
+% savefig(rejected_chan_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels.fig']))
+% print(rejected_chan_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels.png']),'-dpng')
+% close(rejected_chan_plot_handle)
+% 
+% savefig(detection_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels_detection.fig']))
+% print(detection_plot_handle,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_bad_channels_detection.png']),'-dpng')
+% close(detection_plot_handle)
 
 %% do the actual interpolation and average referencing (reference is not considering EOGs)
 
 disp('Interpolating bad channels and compute final average reference, ignoring EOG channels...')
+
 [ALLEEG, EEG_preprocessed, CURRENTSET] = bemobil_interp_avref( EEG_basic , ALLEEG, CURRENTSET, chans_to_interp,...
     [bemobil_config.filename_prefix num2str(subject) '_' bemobil_config.preprocessed_filename], output_filepath);
 
-%% plot interpolated filtered, for analytics
-
-disp('Filtering data only for plotting!')
-EEG = pop_eegfiltnew(EEG_preprocessed, 'locutoff',0.5);
-
-%%
-
-plotfigure = figure('color','w');
-set(plotfigure, 'Position', get(0,'screensize'))
-ax1 = subplot(231);
-ax2 = subplot(232);
-ax3 = subplot(233);
-ax4 = subplot(234);
-ax5 = subplot(235);
-ax6 = subplot(236);
-
-starttime = EEG.times(end)/7*1;
-vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-    round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-drawnow
-axeshandle = gca;
-fighandle = gcf;
-axcp = copyobj(axeshandle, plotfigure);
-set(axcp,'Position',get(ax1,'position'));
-axcp.XTickLabel = [0:10]+round(starttime/1000);
-axcp.YTick=[];
-axcp.Title.String = ['Interpolated channels data section 1 of ' num2str(round(EEG.times(end)/1000)) 's'];
-axcp.XLabel.String = 'seconds';
-drawnow
-delete(ax1);
-close(fighandle)
-
-starttime = EEG.times(end)/7*2;
-vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-    round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-drawnow
-axeshandle = gca;
-fighandle = gcf;
-axcp = copyobj(axeshandle, plotfigure);
-set(axcp,'Position',get(ax2,'position'));
-axcp.XTickLabel = [0:10]+round(starttime/1000);
-axcp.YTick=[];
-axcp.Title.String = ['Interpolated channels data section 2 of ' num2str(round(EEG.times(end)/1000)) 's'];
-axcp.XLabel.String = 'seconds';
-drawnow
-delete(ax2);
-close(fighandle)
-
-starttime = EEG.times(end)/7*3;
-vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-    round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-drawnow
-axeshandle = gca;
-fighandle = gcf;
-axcp = copyobj(axeshandle, plotfigure);
-set(axcp,'Position',get(ax3,'position'));
-axcp.XTickLabel = [0:10]+round(starttime/1000);
-axcp.YTick=[];
-axcp.Title.String = ['Interpolated channels data section 3 of ' num2str(round(EEG.times(end)/1000)) 's'];
-axcp.XLabel.String = 'seconds';
-drawnow
-delete(ax3);
-close(fighandle)
-
-starttime = EEG.times(end)/7*4;
-vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-    round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-drawnow
-axeshandle = gca;
-fighandle = gcf;
-axcp = copyobj(axeshandle, plotfigure);
-set(axcp,'Position',get(ax4,'position'));
-axcp.XTickLabel = [0:10]+round(starttime/1000);
-axcp.YTick=[];
-axcp.Title.String = ['Interpolated channels data section 4 of ' num2str(round(EEG.times(end)/1000)) 's'];
-axcp.XLabel.String = 'seconds';
-drawnow
-delete(ax4);
-close(fighandle)
-
-starttime = EEG.times(end)/7*5;
-vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-    round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-drawnow
-axeshandle = gca;
-fighandle = gcf;
-axcp = copyobj(axeshandle, plotfigure);
-set(axcp,'Position',get(ax5,'position'));
-axcp.XTickLabel = [0:10]+round(starttime/1000);
-axcp.YTick=[];
-axcp.Title.String = ['Interpolated channels data section 5 of ' num2str(round(EEG.times(end)/1000)) 's'];
-axcp.XLabel.String = 'seconds';
-drawnow
-delete(ax5);
-close(fighandle)
-
-starttime = EEG.times(end)/7*6;
-vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
-    round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
-drawnow
-axeshandle = gca;
-fighandle = gcf;
-axcp = copyobj(axeshandle, plotfigure);
-set(axcp,'Position',get(ax6,'position'));
-axcp.XTickLabel = [0:10]+round(starttime/1000);
-axcp.YTick=[];
-axcp.Title.String = ['Interpolated channels data section 6 of ' num2str(round(EEG.times(end)/1000)) 's'];
-axcp.XLabel.String = 'seconds';
-drawnow
-delete(ax6);
-close(fighandle)
-
-
-%% save plot
-
-savefig(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_interpolated_channels.fig']))
-print(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_interpolated_channels.png']),'-dpng')
-close
+% %% plot interpolated filtered, for analytics
+% 
+% disp('Filtering data only for plotting!')
+% EEG = pop_eegfiltnew(EEG_preprocessed, 'locutoff',0.5);
+% 
+% %%
+% 
+% plotfigure = figure('color','w');
+% set(plotfigure, 'Position', get(0,'screensize'))
+% ax1 = subplot(231);
+% ax2 = subplot(232);
+% ax3 = subplot(233);
+% ax4 = subplot(234);
+% ax5 = subplot(235);
+% ax6 = subplot(236);
+% 
+% starttime = EEG.times(end)/7*1;
+% vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+%     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+% drawnow
+% axeshandle = gca;
+% fighandle = gcf;
+% axcp = copyobj(axeshandle, plotfigure);
+% set(axcp,'Position',get(ax1,'position'));
+% axcp.XTickLabel = [0:10]+round(starttime/1000);
+% axcp.YTick=[];
+% axcp.Title.String = ['Interpolated channels data section 1 of ' num2str(round(EEG.times(end)/1000)) 's'];
+% axcp.XLabel.String = 'seconds';
+% drawnow
+% delete(ax1);
+% close(fighandle)
+% 
+% starttime = EEG.times(end)/7*2;
+% vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+%     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+% drawnow
+% axeshandle = gca;
+% fighandle = gcf;
+% axcp = copyobj(axeshandle, plotfigure);
+% set(axcp,'Position',get(ax2,'position'));
+% axcp.XTickLabel = [0:10]+round(starttime/1000);
+% axcp.YTick=[];
+% axcp.Title.String = ['Interpolated channels data section 2 of ' num2str(round(EEG.times(end)/1000)) 's'];
+% axcp.XLabel.String = 'seconds';
+% drawnow
+% delete(ax2);
+% close(fighandle)
+% 
+% starttime = EEG.times(end)/7*3;
+% vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+%     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+% drawnow
+% axeshandle = gca;
+% fighandle = gcf;
+% axcp = copyobj(axeshandle, plotfigure);
+% set(axcp,'Position',get(ax3,'position'));
+% axcp.XTickLabel = [0:10]+round(starttime/1000);
+% axcp.YTick=[];
+% axcp.Title.String = ['Interpolated channels data section 3 of ' num2str(round(EEG.times(end)/1000)) 's'];
+% axcp.XLabel.String = 'seconds';
+% drawnow
+% delete(ax3);
+% close(fighandle)
+% 
+% starttime = EEG.times(end)/7*4;
+% vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+%     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+% drawnow
+% axeshandle = gca;
+% fighandle = gcf;
+% axcp = copyobj(axeshandle, plotfigure);
+% set(axcp,'Position',get(ax4,'position'));
+% axcp.XTickLabel = [0:10]+round(starttime/1000);
+% axcp.YTick=[];
+% axcp.Title.String = ['Interpolated channels data section 4 of ' num2str(round(EEG.times(end)/1000)) 's'];
+% axcp.XLabel.String = 'seconds';
+% drawnow
+% delete(ax4);
+% close(fighandle)
+% 
+% starttime = EEG.times(end)/7*5;
+% vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+%     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+% drawnow
+% axeshandle = gca;
+% fighandle = gcf;
+% axcp = copyobj(axeshandle, plotfigure);
+% set(axcp,'Position',get(ax5,'position'));
+% axcp.XTickLabel = [0:10]+round(starttime/1000);
+% axcp.YTick=[];
+% axcp.Title.String = ['Interpolated channels data section 5 of ' num2str(round(EEG.times(end)/1000)) 's'];
+% axcp.XLabel.String = 'seconds';
+% drawnow
+% delete(ax5);
+% close(fighandle)
+% 
+% starttime = EEG.times(end)/7*6;
+% vis_artifacts(EEG,EEG,'show_events',1,'time_subset',...
+%     round([starttime starttime+10000]/1000)); % plot 10s at the first quarter
+% drawnow
+% axeshandle = gca;
+% fighandle = gcf;
+% axcp = copyobj(axeshandle, plotfigure);
+% set(axcp,'Position',get(ax6,'position'));
+% axcp.XTickLabel = [0:10]+round(starttime/1000);
+% axcp.YTick=[];
+% axcp.Title.String = ['Interpolated channels data section 6 of ' num2str(round(EEG.times(end)/1000)) 's'];
+% axcp.XLabel.String = 'seconds';
+% drawnow
+% delete(ax6);
+% close(fighandle)
+% 
+% 
+% %% save plot
+% 
+% savefig(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_interpolated_channels.fig']))
+% print(plotfigure,fullfile(output_filepath,[bemobil_config.filename_prefix num2str(subject) '_interpolated_channels.png']),'-dpng')
+% close
 
 disp('All basic EEG processing done.')
